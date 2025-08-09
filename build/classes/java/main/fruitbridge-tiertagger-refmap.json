@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "de/pro/fb_tiertagger/mixin/MixinPlayerEntity": {
+      "getDisplayName": "Lnet/minecraft/class_1657;method_5476()Lnet/minecraft/class_2561;"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "de/pro/fb_tiertagger/mixin/MixinPlayerEntity": {
+        "getDisplayName": "Lnet/minecraft/class_1657;method_5476()Lnet/minecraft/class_2561;"
+      }
+    }
+  }
+}

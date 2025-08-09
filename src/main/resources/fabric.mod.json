@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "fb_tiertagger",
+  "version": "${version}",
+  "name": "fruitbridge tiertagger",
+  "description": "fb tiertags ingame!",
+  "authors": [ "Pro6603" ],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/fb_tiertagger/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "de.pro.fb_tiertagger.client.Fb_tiertaggerDataGenerator"
+    ],
+    "client": [
+      "de.pro.fb_tiertagger.client.Fb_tiertaggerClient"
+    ],
+    "main": [
+      "de.pro.fb_tiertagger.Fb_tiertagger"
+    ]
+  },
+  "mixins": [
+    "mixins.fb_tiertagger.json",
+    {
+      "config": "fb_tiertagger.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "resources": [
+    {
+      "type": "font",
+      "name": "fb_tiertagger:tier_icons"
+    }
+  ],
+  "custom": {
+    "fabric": {
+      "clientResources": true
+    }
+  }
+}
