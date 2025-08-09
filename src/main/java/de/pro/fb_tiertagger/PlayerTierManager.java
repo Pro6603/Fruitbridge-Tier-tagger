@@ -6,109 +6,124 @@ import net.minecraft.text.Style;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerTierManager {
-    private static final Map<String, String> TIER_MAP = new HashMap<>();
+    private static final char ICON_CHAR = '\ua000'; // special unicode icon
+    private static final Text SPACE = Text.literal(" ");
+    private static final Text LINE = Text.literal("|").setStyle(Style.EMPTY.withColor(Formatting.GRAY));
+
+    // Lowercased, immutable map for O(1) lookups without String case ops
+    private static final Map<String, String> TIER_MAP;
+    // Prebuilt icon+tier parts for fast concatenation
+    private static final Map<String, Text[]> PREBUILT_TIER_TEXTS = new HashMap<>();
+    // Cache to avoid repeated lookups
+    private static final Map<UUID, String> tierCache = new HashMap<>();
 
     static {
-        TIER_MAP.put("Turnk", "HT1");
-        TIER_MAP.put("AbyssalMC", "HT1");
-        TIER_MAP.put("MORAES13", "HT1");
-        TIER_MAP.put("Slord", "LT1");
-        TIER_MAP.put("Pogulin", "LT1");
-        TIER_MAP.put("5bps", "LT1");
-        TIER_MAP.put("Imperfexion", "LT1");
-        TIER_MAP.put("Reddi_Guy", "LT1");
-        TIER_MAP.put("TriedYapper", "LT1");
-        TIER_MAP.put("Pro6603", "LT1");
-        TIER_MAP.put("sajgonek27", "LT1");
+        Map<String, String> map = new HashMap<>();
 
-        TIER_MAP.put("_Talyn_", "LT2");
-        TIER_MAP.put("Crytist", "LT2");
-        TIER_MAP.put("mcffin", "LT2");
-        TIER_MAP.put("Wreet", "LT2");
+        // === HT1 ===
+        map.put("turnk", "HT1");
+        map.put("abyssalmc", "HT1");
+        map.put("moraes13", "HT1");
 
-        TIER_MAP.put("fruitnhas", "HT3");
-        TIER_MAP.put("mizuts", "HT3");
-        TIER_MAP.put("Paragon_PVP", "HT3");
-        TIER_MAP.put("Jaca_", "HT3");
-        TIER_MAP.put("doorboat", "HT3");
-        TIER_MAP.put("Sxarhawk", "HT3");
-        TIER_MAP.put("boiboi2mc", "HT3");
+        // === LT1 ===
+        map.put("slord", "LT1");
+        map.put("pogulin", "LT1");
+        map.put("5bps", "LT1");
+        map.put("imperfexion", "LT1");
+        map.put("reddi_guy", "LT1");
+        map.put("triedyapper", "LT1");
+        map.put("pro6603", "LT1");
+        map.put("sajgonek27", "LT1");
 
-        TIER_MAP.put("ItsMeLuke2020", "LT3");
-        TIER_MAP.put("SwifttMC", "LT3");
-        TIER_MAP.put("louie924", "LT3");
-        TIER_MAP.put("TheJury89YT", "LT3");
-        TIER_MAP.put("Popp_E", "LT3");
-        TIER_MAP.put("Spefex", "LT3");
-        TIER_MAP.put("Gelblich", "LT3");
-        TIER_MAP.put("tenpura518", "LT3");
+        // === LT2 ===
+        map.put("_talyn_", "LT2");
+        map.put("crytist", "LT2");
+        map.put("mcffin", "LT2");
+        map.put("wreet", "LT2");
 
-        TIER_MAP.put("Citr0n_Vert", "HT4");
-        TIER_MAP.put("THEWildBoon", "HT4");
-        TIER_MAP.put("Blizzy09", "HT4");
-        TIER_MAP.put("JustMossLOL", "HT4");
-        TIER_MAP.put("LaserYT", "HT4");
+        // === HT3 ===
+        map.put("fruitnhas", "HT3");
+        map.put("mizuts", "HT3");
+        map.put("paragon_pvp", "HT3");
+        map.put("jaca_", "HT3");
+        map.put("doorboat", "HT3");
+        map.put("sxarhawk", "HT3");
+        map.put("boiboi2mc", "HT3");
 
-        TIER_MAP.put("LifeKnifeMC", "LT4");
-        TIER_MAP.put("ozi_wafle", "LT4");
-        TIER_MAP.put("italovidor1512", "LT4");
-        TIER_MAP.put("pqanda", "LT4");
-        TIER_MAP.put("s1baken", "LT4");
-        TIER_MAP.put("JustinIsGaming", "LT4");
-        TIER_MAP.put("_Cuguli_", "LT4");
+        // === LT3 ===
+        map.put("itsmeluke2020", "LT3");
+        map.put("swifttmc", "LT3");
+        map.put("louie924", "LT3");
+        map.put("thejury89yt", "LT3");
+        map.put("popp_e", "LT3");
+        map.put("spefex", "LT3");
+        map.put("gelblich", "LT3");
+        map.put("tenpura518", "LT3");
 
-        TIER_MAP.put("Acy_", "HT5");
-        TIER_MAP.put("ItsJustPickles", "HT5");
-        TIER_MAP.put("Fox_Aspects", "HT5");
-        TIER_MAP.put("reverth23", "HT5");
-        TIER_MAP.put("SculkAndTroll", "HT5");
-        TIER_MAP.put("Wetsake", "HT5");
-        // Add more players and tiers as needed
+        // === HT4 ===
+        map.put("citr0n_vert", "HT4");
+        map.put("thewildboon", "HT4");
+        map.put("blizzy09", "HT4");
+        map.put("justmosslol", "HT4");
+        map.put("laseryt", "HT4");
+
+        // === LT4 ===
+        map.put("lifeknifemc", "LT4");
+        map.put("ozi_wafle", "LT4");
+        map.put("italovidor1512", "LT4");
+        map.put("pqanda", "LT4");
+        map.put("s1baken", "LT4");
+        map.put("justinisgaming", "LT4");
+        map.put("_cuguli_", "LT4");
+
+        // === HT5 ===
+        map.put("acy_", "HT5");
+        map.put("itsjustpickles", "HT5");
+        map.put("fox_aspects", "HT5");
+        map.put("reverth23", "HT5");
+        map.put("sculkandtroll", "HT5");
+        map.put("wetsake", "HT5");
+
+        TIER_MAP = Collections.unmodifiableMap(map);
+
+        // Prebuild Text parts for all tiers
+        for (String tier : new HashSet<>(map.values())) {
+            TextColor color = getFormatting(tier);
+            Text icon = Text.literal(String.valueOf(ICON_CHAR)).setStyle(Style.EMPTY.withColor(color));
+            Text tierText = Text.literal(tier).setStyle(Style.EMPTY.withColor(color));
+            PREBUILT_TIER_TEXTS.put(tier, new Text[]{icon, tierText});
+        }
     }
 
-    // Returns the tier code for the player or null if none
     public static String getTier(PlayerEntity player) {
         if (player == null || player.getGameProfile() == null) return null;
-        return TIER_MAP.get(player.getGameProfile().getName());
+
+        UUID id = player.getUuid();
+        String cached = tierCache.get(id);
+        if (cached != null) return cached;
+
+        String tier = TIER_MAP.get(player.getGameProfile().getName().toLowerCase(Locale.ROOT));
+        if (tier != null) tierCache.put(id, tier);
+        return tier;
     }
 
-    // Appends the tier icon (unicode char) before the player's name, colored per tier
     public static Text appendTier(PlayerEntity player, Text original) {
         String tier = getTier(player);
         if (tier == null) return original;
 
-        // avaiable: ua000 and ua001, check emerald_1 and emerald_2.png for more epic not more epic stuff yes frfr true bonkers huh ezz LLL
-        char iconChar = '\ua000'; // Your special unicode icon char
-        TextColor color = getFormatting(tier);
-
-        Text iconText = Text.literal(String.valueOf(iconChar))
-                .setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-
-        Text tierText = Text.literal(tier.toUpperCase())
-                .setStyle(Style.EMPTY.withColor(color));
-
-        Text lineText = Text.literal("|")
-                .setStyle(Style.EMPTY.withColor(Formatting.GRAY));
-
-        Text space = Text.literal(" ");
-
-        // Compose: icon + tier + space + original name
+        Text[] parts = PREBUILT_TIER_TEXTS.get(tier);
         return Text.empty()
-                .append(iconText)
-                .append(space)
-                .append(tierText)
-                .append(space)
-                .append(lineText)
-                .append(space)
+                .append(parts[0]).append(SPACE)
+                .append(parts[1]).append(SPACE)
+                .append(LINE).append(SPACE)
                 .append(original);
     }
 
     private static TextColor getFormatting(String tier) {
-        return switch (tier.toUpperCase()) {
+        return switch (tier) {
             case "HT1" -> TextColor.fromFormatting(Formatting.YELLOW);
             case "LT1" -> TextColor.fromFormatting(Formatting.GOLD);
             case "HT2" -> TextColor.fromRgb(0xC0C0C0);
@@ -118,5 +133,9 @@ public class PlayerTierManager {
             case "HT4", "LT4", "HT5", "LT5" -> TextColor.fromFormatting(Formatting.DARK_GRAY);
             default -> TextColor.fromFormatting(Formatting.GRAY);
         };
+    }
+
+    public static void clearCache() {
+        tierCache.clear();
     }
 }

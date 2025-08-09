@@ -4,7 +4,7 @@
   "package": "de.pro.fb_tiertagger.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "MixinPlayerEntityRenderer"
+
   ],
   "injectors": {
     "defaultRequire": 1

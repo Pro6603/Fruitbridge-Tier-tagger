@@ -19,9 +19,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(PlayerEntityRenderer.class)
+//@Mixin(PlayerEntityRenderer.class)
 public class MixinPlayerEntityRenderer {
-
+/*
     @Inject(method = "renderLabelIfPresent", at = @At("RETURN"))
     private void renderTierIconNextToNametag(
             AbstractClientPlayerEntity player,
@@ -99,4 +99,6 @@ public class MixinPlayerEntityRenderer {
 
         return new Pair<>('\ua001', color);
     }
+
+ */
 }
